@@ -1,7 +1,6 @@
 import sqlite3
 from django.shortcuts import render, reverse, redirect
 from django.contrib.auth.decorators import login_required
-from libraryapp.models import Book
 from libraryapp.models import Library
 from ..connection import Connection
 
@@ -22,10 +21,10 @@ def get_libraries():
         return db_cursor.fetchall()
 
 @login_required
-def book_form(request):
+def library_form(request):
     if request.method == 'GET':
         libraries = get_libraries()
-        template = 'books/form.html'
+        template = 'libraries/form.html'
         context = {
             'all_libraries': libraries
         }
@@ -38,15 +37,13 @@ def book_form(request):
         db_cursor = conn.cursor()
 
         db_cursor.execute("""
-        INSERT INTO libraryapp_book
+        INSERT INTO libraryapp_library
         (
-            title, author, isbn,
-            year_published, librarian_id, location_id
+            title, address
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?)
         """,
-        (form_data['title'], form_data['author'],
-            form_data['isbn'], form_data['year_published'],
-            request.user.librarian.id, form_data["location"]))
+        (form_data['title'], form_data['address'])
+        )
 
-        return redirect(reverse('libraryapp:books'))
+        return redirect(reverse('libraryapp:libraries'))
